@@ -107,22 +107,3 @@ jobs:
       - name: Push Docker image
         run: docker push ghcr.io/${{ github.repository_owner }}/chromadb-admin-presence-client:latest
 
-  deploy-docker-compose:
-    runs-on: ubuntu-latest
-    needs: push
-    steps:
-      - name: Install SSH Key and Known Hosts
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: SSH into VPS and Deploy
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
-          docker login ghcr.io -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }}
-          cd app
-          git pull
-          docker-compose pull
-          docker-compose up --build -d
-          ENDSSH
-
